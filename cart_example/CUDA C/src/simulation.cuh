@@ -1,9 +1,4 @@
 #pragma once
-
-#include <cuda_runtime.h>
-#include <chrono>
-#include <stdexcept>
-#include <cassert>
 #include "utility.cuh"
 
 // ==================== CONSTANTS ====================
@@ -82,8 +77,7 @@ __constant__ float alpha = 1.0;
 __constant__ int dim = 4;
 
 
-// ==================== META ====================
-enum class PROCESSOR { HOST, DEVICE };
+
 
 // ==================== STRUCTS ====================
 // Simulation Metadata
@@ -96,186 +90,6 @@ typedef struct Sim_Metadata {
     float2 nom; // Nominal position
 } Sim_Metadata;
 
-class Matrix {
-public:
-    // Constructor: initializes the matrix based on processor type
-    Matrix(int rows, int cols, float fill, PROCESSOR proc) 
-        : rows_(rows), cols_(cols), proc_(proc), size_(rows*cols)
-    {
-        if (proc_ == PROCESSOR::HOST) {
-            init_host(fill);
-        } else if (proc_ == PROCESSOR::DEVICE) {
-            init_device(fill);
-        } else {
-            assert(false && "Invalid processor type");
-        }
-    }
-    // Delegating constructor (sets default fill to 0.f)
-    Matrix(int rows, int cols, PROCESSOR proc) : Matrix(rows, cols, 0.f, proc) 
-    {
-        // delegated to constructor with fill (above)
-    }
-
-
-    // Destructor
-    ~Matrix() {
-        if (proc_ == PROCESSOR::HOST) {
-            free_host();
-        } else if (proc_ == PROCESSOR::DEVICE) {
-            free_device();
-        } else {
-            assert(false && "Invalid processor type for destructor");
-        }
-    }
-
-    // Delete copy constructor and assignment if deep copy is non-trivial
-    Matrix(const Matrix&) = delete;
-    Matrix& operator=(const Matrix&) = delete;
-
-    // overload [] operator to return a pointer to specified row (can be used like matrix[row][col] now)
-    __host__ __device__
-    float* operator[](int row) {
-        if (is_data_on_host() != is_running_on_host()) {
-            assert(false && "Using [] for data on the wrong processor");
-        }
-        if (row >= rows_) {
-            assert(false && "Row access out of range");
-        }
-        return data_ + (row * cols_);
-    }
-    __host__ __device__
-    const float* operator[](int row) const {
-        if (is_data_on_host() != is_running_on_host()) {
-            assert(false && "Using [] for data on the wrong processor");
-        }
-        if (row >= rows_) {
-            assert(false && "Row access out of range");
-        }
-        return data_ + (row * cols_);
-    }
-    __host__ __device__
-    float& operator()(int row, int col) {
-        if (is_data_on_host() != is_running_on_host()) {
-            assert(false && "Using () for data on the wrong processor");
-        }
-        if ((row >= rows_) || (col >= cols_)) {
-            if ((row >= rows_) && !(col >= cols_)) {
-                assert(false && "Row access out of range");
-            } else if (!(row >= rows_) && (col >= cols_)) {
-                assert(false && "Col access out of range");
-            } else {
-                assert(false && "Row AND col access out of range");
-            }
-        }
-        return data_[row * cols_ + col];
-    }
-    __host__ __device__
-    const float& operator()(int row, int col) const {
-        if (is_data_on_host() != is_running_on_host()) {
-            assert(false && "Using () for data on the wrong processor");
-        }
-        if ((row >= rows_) || (col >= cols_)) {
-            if ((row >= rows_) && !(col >= cols_)) {
-                assert(false && "Row access out of range");
-            } else if (!(row >= rows_) && (col >= cols_)) {
-                assert(false && "Col access out of range");
-            } else {
-                assert(false && "Row AND col access out of range");
-            }
-        }
-        return data_[row * cols_ + col];
-    }
-
-    __host__ __device__
-    const bool is_data_on_host() const {
-        return proc_ == PROCESSOR::HOST;
-    }
-
-    __host__ void print() const {
-        float* printable_data;
-        if (is_data_on_host()) {
-            printable_data = data_;
-        } else {
-            printable_data = new float[rows() * cols()];
-            cudaTry(cudaMemcpy(printable_data, data_, rows() * cols() * sizeof(float)));
-        }
-        for (int i = 0; i < rows(); i++) {
-            for (int j = 0; j < cols(); j++) {
-                std::cout << "Element (" << i << ", " << "j): " << printable_data[i*cols() + j] << std::endl;
-            }
-        }
-
-        if (!is_data_on_host()) {
-            delete[] printable_data;
-        }
-    }
-
-    // some getters
-    // gets num rows
-    __host__ __device__ int rows() const { return rows_; }
-    // gets num cols
-    __host__ __device__ int cols() const { return cols_; }
-    // returns rows * cols
-    __host__ __device__ int size() const { return size_; }
-    
-private:
-    int rows_;
-    int cols_;
-    int size_;
-    float *data_;   // Contiguous block of data
-    PROCESSOR proc_;
-
-    // Host-specific initialization
-    void init_host(float fill) {
-        // allocate mem on host
-        data_ = new float[static_cast<size_t>(size_)];
-
-        // fill
-        for (int i = 0; i < rows_ * cols_; i++) {
-            data_[i] = fill;
-        }
-    }
-
-    // Device-specific initialization
-    void init_device(float fill) {
-        // allocate mem on device
-        cudaTry(cudaMalloc((void**)&data_, static_cast<size_t>(size_) * sizeof(float)));
-
-        // take advantage of memset if fill is 0
-        if (fill == 0.0f) {
-            cudaMemset(data_, 0, static_cast<size_t>(size_) * sizeof(float));
-        } else {
-            dim3 block_size(256);
-            dim3 grid_size((static_cast<size_t>(size_) + block_size.x - 1) / block_size.x);
-            fill_kernel<<<grid_size, block_size>>>(data_, size_, fill);
-            // check for errors below
-            cudaError_t err = cudaDeviceSynchronize();
-            if (err != cudaSuccess) {
-                // Clean up device memory before throwing
-                cudaFree(data_);
-                data_ = nullptr;
-                assert(false && "Kernel or sync failed in init_device");
-            }
-        }
-
-    }
-
-    // Host-specific cleanup
-    void free_host() {
-        if (data_ != nullptr) {
-            delete[] data_;
-            data_ = nullptr;
-        }
-    }
-
-    // Device-specific cleanup
-    void free_device() {
-        if (data_ != nullptr) {
-            cudaTry(cudaFree(data_));
-            data_ = nullptr;
-        }
-    }
-};
 
 
 
@@ -331,5 +145,5 @@ __device__ void Linear(Matrix input, Matrix output, Matrix weights, Matrix bias)
 
 
 // ==================== SIMULATION FUNCTIONS ====================
-
+__global__ void step(const Matrix samples_in_d, const Matrix disturbances, Matrix samples_out_d);
 

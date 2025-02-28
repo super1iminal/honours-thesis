@@ -1,23 +1,13 @@
 // tests.cu
-#include <cuda_runtime.h>
-#include <iostream>
 #include "simulation.cuh"  // Include your header files
 #include "utility.cuh"
 
-//------------------------------------------------------------------------------
-// Kernel to copy the matrix values into an output array on the device
-//------------------------------------------------------------------------------
-__global__
-void copy_matrix_kernel(const Matrix* m, float *output) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < m->size()) {
-        // Convert linear index to row and column indices
-        int row = idx / m->cols();
-        int col = idx % m->cols();
-        output[idx] = (*m)(row, col);
-    }
-}
+// =============================================================================
+// Matrix Tests
+//
+// =============================================================================
 
+// HOST TESTS ==================================================================
 //------------------------------------------------------------------------------
 // Host test: Create a host matrix with a specific fill value and verify 
 // the dimensions and element values via both operator() and operator[]
@@ -73,35 +63,53 @@ void testHostMatrixDefault() {
     std::cout << "testHostMatrixDefault passed.\n";
 }
 
+void testHostMatrixWithData() {
+    const int rows = 3, cols = 3;
+    float **data = new float*[rows];
+    for (int i = 0; i < rows; ++i) {
+        data[i] = new float[cols];
+        for (int j = 0; j < cols; ++j) {
+            data[i][j] = i * cols + j;
+        }
+    }
+
+    Matrix m(rows, cols, data, PROCESSOR::HOST);
+
+    // Verify dimensions
+    assert(m.rows() == rows);
+    assert(m.cols() == cols);
+    assert(m.size() == rows * cols);
+
+    // Verify the contents of the host memory
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            assert(m(i, j) == data[i][j]);
+        }
+    }
+
+    for (int i = 0; i < rows; ++i) {
+        delete[] data[i];
+    }
+    delete[] data;
+
+    std::cout << "testHostMatrixWithData passed.\n";
+}
+
+
+
+// DEVICE TESTS ==================================================================
 //------------------------------------------------------------------------------
 // Helper function to verify that a device matrix contains the expected fill value.
 // It launches a kernel that copies the matrix values to an output array, then
 // copies that data back to the host for verification.
 //------------------------------------------------------------------------------
-void verifyDeviceMatrix(const Matrix &m, float expectedFill) {
-    int size = m.size();
-    float *d_out = nullptr;
-    cudaError_t err = cudaMalloc(&d_out, size * sizeof(float));
-    assert(err == cudaSuccess);
+void verifyDeviceMatrix(const Matrix &m, float* expected_data) {
+    float *h_out = new float[m.size()];
+    cudaTry(cudaMemcpy(h_out, m.data(), m.size() * sizeof(float), cudaMemcpyDeviceToHost));
 
-    const int threadsPerBlock = 256;
-    int blocks = (size + threadsPerBlock - 1) / threadsPerBlock;
-    copy_matrix_kernel<<<blocks, threadsPerBlock>>>(&m, d_out);
-    err = cudaDeviceSynchronize();
-    assert(err == cudaSuccess);
-
-    float *h_out = new float[size];
-    err = cudaMemcpy(h_out, d_out, size * sizeof(float), cudaMemcpyDeviceToHost);
-    assert(err == cudaSuccess);
-
-    // Verify each element is as expected (using a small epsilon for floating-point comparison)
-    for (int i = 0; i < size; ++i) {
-        float diff = fabs(h_out[i] - expectedFill);
-        assert(diff < 1e-5);
-    }
+    assert(within_threshold(h_out, expected_data, m.size(), 1e-5));
 
     delete[] h_out;
-    cudaFree(d_out);
 }
 
 //------------------------------------------------------------------------------
@@ -109,9 +117,15 @@ void verifyDeviceMatrix(const Matrix &m, float expectedFill) {
 // the dimensions and element values via a CUDA kernel.
 //------------------------------------------------------------------------------
 void testDeviceMatrixWithFill() {
-    const int rows = 6, cols = 7;
-    const float fill = 3.14f;
+    const int rows = 6, cols = 9;
+    const float fill = 1.17;
     Matrix m(rows, cols, fill, PROCESSOR::DEVICE);
+
+    // setup expected fill list
+    float *expected_data = new float[m.size()];
+    for (int i = 0; i < m.size(); ++i) {
+        expected_data[i] = fill;
+    }
 
     // Verify dimensions
     assert(m.rows() == rows);
@@ -119,7 +133,9 @@ void testDeviceMatrixWithFill() {
     assert(m.size() == rows * cols);
 
     // Verify the contents of the device memory
-    verifyDeviceMatrix(m, fill);
+    verifyDeviceMatrix(m, expected_data);
+
+    delete[] expected_data;
 
     std::cout << "testDeviceMatrixWithFill passed.\n";
 }
@@ -131,15 +147,63 @@ void testDeviceMatrixDefault() {
     const int rows = 5, cols = 5;
     Matrix m(rows, cols, PROCESSOR::DEVICE);
 
+    // setup expected fill list
+    float *expected_data = new float[m.size()];
+    for (int i = 0; i < m.size(); ++i) {
+        expected_data[i] = m.default_fill;
+    }
+
     // Verify dimensions
     assert(m.rows() == rows);
     assert(m.cols() == cols);
     assert(m.size() == rows * cols);
 
     // Verify the contents of the device memory (all should be 0.0)
-    verifyDeviceMatrix(m, 0.0f);
+    verifyDeviceMatrix(m, expected_data);
+
+    delete[] expected_data;
 
     std::cout << "testDeviceMatrixDefault passed.\n";
+}
+
+//------------------------------------------------------------------------------
+// Device test: Create a device matrix using a pre-defined list of data
+//------------------------------------------------------------------------------
+void testDeviceMatrixWithData() {
+    const int rows = 3, cols = 3;
+    float **data = new float*[rows];
+    for (int i = 0; i < rows; ++i) {
+        data[i] = new float[cols];
+        for (int j = 0; j < cols; ++j) {
+            data[i][j] = i * cols + j;
+        }
+    }
+
+    Matrix m(rows, cols, data, PROCESSOR::DEVICE);
+
+    // Verify dimensions
+    assert(m.rows() == rows);
+    assert(m.cols() == cols);
+    assert(m.size() == rows * cols);
+
+    // Verify the contents of the device memory
+    float *h_out = new float[m.size()];
+    cudaTry(cudaMemcpy(h_out, m.data(), m.size() * sizeof(float), cudaMemcpyDeviceToHost));
+
+    // Verify each element is as expected
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            assert(data[i][j] == h_out[i * cols + j]);
+        }
+    }
+
+    delete[] h_out;
+    for (int i = 0; i < rows; ++i) {
+        delete[] data[i];
+    }
+    delete[] data;
+
+    std::cout << "testDeviceMatrixWithData passed.\n";
 }
 
 //------------------------------------------------------------------------------
@@ -149,10 +213,12 @@ int main() {
     // Run tests on host-based matrices
     testHostMatrixWithFill();
     testHostMatrixDefault();
+    testHostMatrixWithData();
 
     // Run tests on device-based matrices
     testDeviceMatrixWithFill();
     testDeviceMatrixDefault();
+    testDeviceMatrixWithData();
 
     std::cout << "All tests passed.\n";
     return 0;

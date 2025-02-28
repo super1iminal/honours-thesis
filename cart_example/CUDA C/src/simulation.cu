@@ -1,5 +1,4 @@
 #include "simulation.cuh"
-#include "utility.cuh" // For cudaTry and generate_random_numbers
 
 // ==================== NN FUNCTIONS ====================
 // __device__ void ReLU(Matrix input, Matrix output, Matrix weights, Matrix bias) {
@@ -8,7 +7,7 @@
 
 // ==================== SIM FUNCTIONS ====================
 
-__device__ float controller(float* sample, int n) {
+__device__ float controller(const float* sample, int n) {
     float out = 0.f;
     for (int i = 0; i < n; i++) {
         out += sample[i] * policy_weights[i];
@@ -16,7 +15,7 @@ __device__ float controller(float* sample, int n) {
     return out;
 }
 
-__device__ void model(float* sample, float u, int n, float* out) {
+__device__ void model(const float* sample, float u, int n, float* out) {
     float force = u;
     // clamp 
     force = force > 0.f ? force > max_force ? max_force : force : force < -max_force ? -max_force : max_force;
@@ -56,11 +55,28 @@ Explanation:
     - To avoid data bloat by passing the same weights for every thread, I've put them in constant memory (see __constant__ declarations in .h)
         this will save space and time at the cost of less dynamic capability. sorry
 */
-__global__ void step(Matrix* tensor_samples_in_d, Matrix* tensor_samples_out_d) {
+__global__ void step(const Matrix samples_in_d, const Matrix disturbances, Matrix samples_out_d) {
+    if (samples_in_d.cols() != samples_out_d.cols()) {
+        return;
+    }
+    if (samples_in_d.rows() != samples_out_d.rows()) {
+        return;
+    }
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
-    float* sample = (*tensor_samples_in_d)[idx];
-    int n = tensor_samples_in_d->cols(); // dimension of controller
-    // for each sample (this thread will have the sample idx):
+    if (idx >= samples_in_d.rows()) {
+        return;
+    }
+    const float* sample = samples_in_d[idx];
+
+    float u = controller(sample, samples_in_d.cols());
+    float next_sample[4];
+    model(sample, u, samples_in_d.cols(), next_sample);
+    for (int i = 0; i < samples_in_d.cols(); i++) {
+        samples_out_d[idx][i] = next_sample[i] + disturbances[idx][i];
+    }
+
+
+        // for each sample (this thread will have the sample idx):
         // apply vector-vector multiplication between the 1x4 sample vector and some static weight vector ([ 0.6234,  1.8060, 34.6404, 11.8123])
         // apply model to sample****:
             // constraints (input: time)
@@ -69,15 +85,9 @@ __global__ void step(Matrix* tensor_samples_in_d, Matrix* tensor_samples_out_d) 
                 // currently just returns [0,0,0,0]
             // controller (input: sample, planner output)
                 // currently ignores r, just outputs NN eval of samples
-    float u = controller(sample, n);
-            // model (input: sample, controller output)
-    float next_sample[4];
-    model(sample, u, n, next_sample);
-                // very long, but pretty straightforward math
-        // send it to samples_out
-    for (int i = 0; i < n; i++) {
-        (*tensor_samples_out_d)[idx][i] = next_sample[i];
-    }
+                // model (input: sample, controller output)
+                    // very long, but pretty straightforward math
+            // send it to samples_out
 }
 
 /*
