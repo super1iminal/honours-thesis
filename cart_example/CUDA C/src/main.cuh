@@ -10,7 +10,6 @@
 #include <time.h>
 
 // Include updated headers
-#include "simulation.h"   // For Samples, Sim_Metadata, and Disturbances
-#include "logger.h"
-#include "regions.h"
-#include "utility.h"
+#include "simulation.cuh"   // For Samples, Sim_Metadata, and Disturbances
+#include "regions.cuh"
+#include "utility.cuh"

@@ -53,10 +53,21 @@ int eq_arrays(float* arr1, float* arr2, int n, float threshold);
 // CUDA kernels
 __global__ void generate_random_numbers(float *data, int size, unsigned long long seed);
 __global__ void set_to_zero(int *arr, int n);
+__global__ void fill_kernel(float *data, int length, float value);
 
 void generate_points(Samples* samples, Ellipse* h_ellipse, int k, float kp, float kd, Logger*logger);
 // new stuff
 __device__ float2 step_toy(float2 x, float2 disturbance, float kp, float kd);
 __device__ float2 generate_candidate_point(int idx, unsigned long long seed, float kp, float kd, int k);
 __device__ int check_acceptance(float2 point, Ellipse* ellipse);
-__global__ void generate_points_kernel(float2* global_output, Ellipse* ellipse, unsigned long long seed, int max_threads, unsigned int* total_accepted_global, float kp, float kd, int k);
+__global__ void generate_points_kernel(float2* global_output, Ellipse* ellipse, unsigned long long seed, 
+    int max_threads, unsigned int* total_accepted_global, float kp, float kd, int k);
+
+__host__ __device__
+bool is_running_on_host() {
+#ifndef __CUDA_ARCH__
+    return true;
+#else
+    return false;
+#endif
+}

@@ -14,7 +14,7 @@ SRC_DIR   := src
 BUILD_DIR := build
 
 # Source files are now in the src directory
-SRCS      := $(SRC_DIR)/main.cu $(SRC_DIR)/utility.cu $(SRC_DIR)/simulation.cu $(SRC_DIR)/logger.cu $(SRC_DIR)/regions.cu
+SRCS := $(filter-out $(SRC_DIR)/tests.cu, $(wildcard $(SRC_DIR)/*.cu))
 TEST_SRCS := $(SRC_DIR)/tests.cu
 
 OBJS      := $(patsubst $(SRC_DIR)/%.cu,$(BUILD_DIR)/%.o,$(SRCS))
@@ -39,23 +39,23 @@ $(BUILD_DIR):
 # Link the main program
 main: $(OBJ_FILES)
 	$(NVCC) $(CUFLAGS) $(OBJ_FILES) -o run -lcurand
+	@rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d
 
 # Build the test executable
 test: $(TEST_OBJ_FILES) $(filter-out $(BUILD_DIR)/main.o, $(OBJ_FILES))
 	$(NVCC) $(CUFLAGS) $(TEST_OBJ_FILES) $(filter-out $(BUILD_DIR)/main.o, $(OBJ_FILES)) -o run_tests -lcurand
-	@echo "Running tests..."
-	./run_tests
+	@rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d
 
 # Clean up build directory
 clean:
-	rm -rf $(BUILD_DIR) run run_tests
+	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d run run_tests
 
 # Compilation rule for .o files, placing them in the build directory
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu | $(BUILD_DIR)
 	$(NVCC) -c $(CUFLAGS) -o $@ $<
 
 # Dependency generation rule, placing the .d files in the build directory
-$(BUILD_DIR)/%.d: $(SRC_DIR)/%.cu
+$(BUILD_DIR)/%.d: $(SRC_DIR)/%.cu | $(BUILD_DIR)
 	$(NVCC) -M $(CUFLAGS) $< > $@
 
 # Include the generated dependency files

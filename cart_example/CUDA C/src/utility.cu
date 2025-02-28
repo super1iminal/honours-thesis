@@ -1,7 +1,6 @@
-#include "utility.h"
-#include "simulation.h"       // For definitions of Samples and Sim_Metadata
-#include "regions.h"          // For full definition of Iteration_Info
-#include "logger.h"           // For logging functions
+#include "utility.cuh"
+#include "simulation.cuh"       // For definitions of Samples and Sim_Metadata
+#include "regions.cuh"          // For full definition of Iteration_Info
 #include <vector_types.h>
 
 void _cudaTry(cudaError_t cudaStatus, const char *fileName, int lineNumber) {
@@ -84,8 +83,12 @@ __global__ void set_to_zero_f2(float2 *arr, int n) {
     }
 }
 
-// sets the output to the closest point 
-__device__ void closest_point(float** points, int n, float* output)
+__global__ void fill_kernel(float *data, int length, float value) {
+    int idx = blockDim.x * blockIdx.x + threadIdx.x;
+    if (idx < length) {
+        data[idx] = value;
+    }
+}
 
 
 // // Device function to perform one simulation step
