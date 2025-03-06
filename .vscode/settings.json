@@ -59,6 +59,15 @@
         "stop_token": "cpp",
         "streambuf": "cpp",
         "thread": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "__hash_table": "cpp",
+        "__split_buffer": "cpp",
+        "__tree": "cpp",
+        "queue": "cpp",
+        "iomanip": "cpp",
+        "__bit_reference": "cpp",
+        "ios": "cpp",
+        "__config": "cpp",
+        "__locale": "cpp"
     }
 }

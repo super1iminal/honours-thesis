@@ -11,21 +11,23 @@ CUFLAGS   := -O3 -g -arch=sm_86
 
 # Define directories
 SRC_DIR   := src
+TEST_DIR  := tests
 BUILD_DIR := build
 
-# Source files are now in the src directory
-SRCS := $(filter-out $(SRC_DIR)/tests.cu, $(wildcard $(SRC_DIR)/*.cu))
-TEST_SRCS := $(SRC_DIR)/tests.cu
+# Source files: all .cu files in src, excluding any test files (if any)
+SRCS := $(wildcard $(SRC_DIR)/*.cu)
+SRCS := $(filter-out $(SRC_DIR)/tests.cu, $(SRCS))
+# Test source files now live in the tests directory
+TEST_SRCS := $(wildcard $(TEST_DIR)/*.cu)
 
+# Object and dependency files for src and tests
 OBJS      := $(patsubst $(SRC_DIR)/%.cu,$(BUILD_DIR)/%.o,$(SRCS))
-TEST_OBJS := $(patsubst $(SRC_DIR)/%.cu,$(BUILD_DIR)/%.o,$(TEST_SRCS))
+TEST_OBJS := $(patsubst $(TEST_DIR)/%.cu,$(BUILD_DIR)/%.o,$(TEST_SRCS))
 
-DEPS      := $(SRCS:.cu=.d) $(TEST_SRCS:.cu=.d)
-OBJ_FILES := $(addprefix $(BUILD_DIR)/, $(notdir $(OBJS)))
-TEST_OBJ_FILES := $(addprefix $(BUILD_DIR)/, $(notdir $(TEST_OBJS)))
-DEP_FILES := $(addprefix $(BUILD_DIR)/, $(notdir $(DEPS)))
+DEPS      := $(patsubst $(SRC_DIR)/%.cu,$(BUILD_DIR)/%.d,$(SRCS)) \
+             $(patsubst $(TEST_DIR)/%.cu,$(BUILD_DIR)/%.d,$(TEST_SRCS))
 
-# Output program names
+# Output program names (main executable from src files, test executable from tests)
 PROGS     := main
 TEST_PROGS := tests
 
@@ -36,27 +38,35 @@ all: $(BUILD_DIR) $(PROGS)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-# Link the main program
-main: $(OBJ_FILES)
-	$(NVCC) $(CUFLAGS) $(OBJ_FILES) -o run -lcurand
+# Link the main program (using only objects built from src)
+main: $(OBJS)
+	$(NVCC) $(CUFLAGS) $(OBJS) -o run -lcurand
 	@rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d
 
-# Build the test executable
-test: $(TEST_OBJ_FILES) $(filter-out $(BUILD_DIR)/main.o, $(OBJ_FILES))
-	$(NVCC) $(CUFLAGS) $(TEST_OBJ_FILES) $(filter-out $(BUILD_DIR)/main.o, $(OBJ_FILES)) -o run_tests -lcurand
+# Build the test executable (link tests objects with non-main objects from src)
+test: $(TEST_OBJS) $(filter-out $(BUILD_DIR)/main.o, $(OBJS))
+	$(NVCC) $(CUFLAGS) $(TEST_OBJS) $(filter-out $(BUILD_DIR)/main.o, $(OBJS)) -o run_tests -lcurand
 	@rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d
 
 # Clean up build directory
 clean:
 	rm -f $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d run run_tests
 
-# Compilation rule for .o files, placing them in the build directory
+# Compilation rule for src .cu files
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu | $(BUILD_DIR)
 	$(NVCC) -c $(CUFLAGS) -o $@ $<
 
-# Dependency generation rule, placing the .d files in the build directory
+# Compilation rule for tests .cu files
+$(BUILD_DIR)/%.o: $(TEST_DIR)/%.cu | $(BUILD_DIR)
+	$(NVCC) -c $(CUFLAGS) -o $@ $<
+
+# Dependency generation rule for src files
 $(BUILD_DIR)/%.d: $(SRC_DIR)/%.cu | $(BUILD_DIR)
 	$(NVCC) -M $(CUFLAGS) $< > $@
 
+# Dependency generation rule for tests files
+$(BUILD_DIR)/%.d: $(TEST_DIR)/%.cu | $(BUILD_DIR)
+	$(NVCC) -M $(CUFLAGS) $< > $@
+
 # Include the generated dependency files
--include $(DEP_FILES)
+-include $(DEPS)

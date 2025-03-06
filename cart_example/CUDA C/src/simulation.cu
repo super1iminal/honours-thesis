@@ -7,18 +7,22 @@
 
 // ==================== SIM FUNCTIONS ====================
 
-__device__ float controller(const float* sample, int n) {
+__device__ float controller(const float *sample, int n)
+{
     float out = 0.f;
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         out += sample[i] * policy_weights[i];
     }
     return out;
 }
 
-__device__ void model(const float* sample, float u, int n, float* out) {
+__device__ void model(const float *sample, float u, int n, float *out)
+{
     float force = u;
-    // clamp 
-    force = force > 0.f ? force > max_force ? max_force : force : force < -max_force ? -max_force : max_force;
+    // clamp
+    force = force > 0.f ? force > max_force ? max_force : force : force < -max_force ? -max_force
+                                                                                     : max_force;
     float x = sample[0];
     float x_dot = sample[1];
     float theta = sample[2];
@@ -29,7 +33,7 @@ __device__ void model(const float* sample, float u, int n, float* out) {
 
     float temp = cart_mass + pole_mass * sin_theta * sin_theta;
     float theta_acc = ((-force * cos_theta) - (pole_mass * length * theta_dot * theta_dot * cos_theta * sin_theta) + (total_mass * gravity * sin_theta)) / (length * temp);
-    float x_acc = (force + (pole_mass * sin_theta * ((length * theta_dot * theta_dot) - (gravity * cos_theta))))/temp;
+    float x_acc = (force + (pole_mass * sin_theta * ((length * theta_dot * theta_dot) - (gravity * cos_theta)))) / temp;
 
     float x_next = x + (tau * x_dot);
     float x_dot_next = x_dot + (tau * x_acc);
@@ -43,51 +47,54 @@ __device__ void model(const float* sample, float u, int n, float* out) {
 
     return;
 }
- 
 
 /*
 Parameters:
     tensor_samples_in: a data tensor of the input samples
     tensor_samples_out: a data tensor of the output samples
 Explanation:
-    - Given a data tensor of all samples (i.e. a matrix where each row corresponds to the values of a samples), 
+    - Given a data tensor of all samples (i.e. a matrix where each row corresponds to the values of a samples),
       return a data tensor of all samples at the next time step
     - To avoid data bloat by passing the same weights for every thread, I've put them in constant memory (see __constant__ declarations in .h)
         this will save space and time at the cost of less dynamic capability. sorry
 */
-__global__ void step(const Matrix samples_in_d, const Matrix disturbances, Matrix samples_out_d) {
-    if (samples_in_d.cols() != samples_out_d.cols()) {
+__global__ void step(const Matrix samples_in_d, const Matrix disturbances, Matrix samples_out_d)
+{
+    if (samples_in_d.cols() != samples_out_d.cols())
+    {
         return;
     }
-    if (samples_in_d.rows() != samples_out_d.rows()) {
+    if (samples_in_d.rows() != samples_out_d.rows())
+    {
         return;
     }
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
-    if (idx >= samples_in_d.rows()) {
+    if (idx >= samples_in_d.rows())
+    {
         return;
     }
-    const float* sample = samples_in_d[idx];
+    const float *sample = samples_in_d[idx];
 
     float u = controller(sample, samples_in_d.cols());
     float next_sample[4];
     model(sample, u, samples_in_d.cols(), next_sample);
-    for (int i = 0; i < samples_in_d.cols(); i++) {
+    for (int i = 0; i < samples_in_d.cols(); i++)
+    {
         samples_out_d[idx][i] = next_sample[i] + disturbances[idx][i];
     }
 
-
-        // for each sample (this thread will have the sample idx):
-        // apply vector-vector multiplication between the 1x4 sample vector and some static weight vector ([ 0.6234,  1.8060, 34.6404, 11.8123])
-        // apply model to sample****:
-            // constraints (input: time)
-                // actually time invariant, pretty easy
-            // planner (input: samples, constraints output)
-                // currently just returns [0,0,0,0]
-            // controller (input: sample, planner output)
-                // currently ignores r, just outputs NN eval of samples
-                // model (input: sample, controller output)
-                    // very long, but pretty straightforward math
-            // send it to samples_out
+    // for each sample (this thread will have the sample idx):
+    // apply vector-vector multiplication between the 1x4 sample vector and some static weight vector ([ 0.6234,  1.8060, 34.6404, 11.8123])
+    // apply model to sample****:
+    // constraints (input: time)
+    // actually time invariant, pretty easy
+    // planner (input: samples, constraints output)
+    // currently just returns [0,0,0,0]
+    // controller (input: sample, planner output)
+    // currently ignores r, just outputs NN eval of samples
+    // model (input: sample, controller output)
+    // very long, but pretty straightforward math
+    // send it to samples_out
 }
 
 /*
@@ -95,19 +102,20 @@ Parameters:
     tensor_samples_in: a data tensor of the input samples
     tensor_samples_out: a data tensor of the output samples
 Explanation:
-    - Given a data tensor of all samples (i.e. a matrix where each row corresponds to the values of a samples), 
+    - Given a data tensor of all samples (i.e. a matrix where each row corresponds to the values of a samples),
         return a data tensor of all samples at the next time step
     - To avoid data bloat by passing the same weights for every thread, I've put them in constant memory (see __constant__ declarations in .h)
         this will save space and time at the cost of less dynamic capability. sorry
 */
-__global__ void lyapunov(Matrix* samples_in, Matrix* lyapunov) {
+__global__ void lyapunov(Matrix *samples_in, Matrix *lyapunov)
+{
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
     // for each sample:
-        // multiply 1x4 sample vector with 4x32 weight matrix
-        // relu
-        // multiply 1x32 vector with 32x32 weight matrix
-        // relu
-        // multiply 32x32 matrix with 32x1 weight matrix
+    // multiply 1x4 sample vector with 4x32 weight matrix
+    // relu
+    // multiply 1x32 vector with 32x32 weight matrix
+    // relu
+    // multiply 32x32 matrix with 32x1 weight matrix
     // need to do all of the above in each individual thread so that millions/billions of samples can be run concurrently
     // should use __constant__ memory for weights for broadcast accesses (very fast accesses)
 }
