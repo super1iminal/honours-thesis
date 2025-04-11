@@ -189,26 +189,6 @@ def constraints(t):
     
     return [Hdef0,Hdef1,Hdef2,Hdef3]
 
-def plotElls(Ell,ri,ax,color,linetype):
-    Q,q = Ell
-    U,D,V = la.svd(Q)
-    
-    rx,ry = 1./np.sqrt(D)
-    dx,dy = 2*rx,2*ry
-    a,b = max(dx,dy)*np.sqrt(ri),min(dx,dy)*np.sqrt(ri)
-    e = np.sqrt(a**2-b**2)/a
-    
-    arcsin = -1. * np.rad2deg(np.arcsin(V[0][0]))
-    arccos = np.rad2deg(np.arccos(V[0][1]))
-    # Orientation angle (with respect to the x axis counterclockwise).
-    alpha = arccos if arcsin > 0. else -1. * arccos
-    
-    ellipse2 = Ellipse(xy=q, width=a, height=b,edgecolor=color,
-        angle=alpha, linestyle = linetype,fc='None', lw=2,zorder=10)
-    ax.add_patch(ellipse2)
-    
-    return 0
-
 
 def baseRegion(points, tol=0.01):
     """
@@ -257,12 +237,6 @@ def monteCarloSimulate(x0,T):
         
     return X_0T,X_0Texp
 
-def regionDefMetric(x,t):
-    C = constraints(t)
-    r = planner(x,C)
-    
-    return np.linalg.norm(x-r,axis=1)
-
 def scoreStateVec(tubeInfo,x):
     
     At = tubeInfo[0]
@@ -299,31 +273,6 @@ def measureOfSafety(x,t):
             rs.append(np.dot(a,x)-b)
     return max(rs)
 
-def maxBoundaryToConstraint(Et,t):
-    
-    Qt = Et[0]
-    qt = Et[1]
-   
-    rList = []
-    xList = []
-    Cx = constraints(t)
-    for Hdef in Cx:
-        a = Hdef[0]
-        b = Hdef[1]
-        
-        gamma = 2*(b-np.dot(a,qt))/(np.dot(a,np.dot(np.linalg.inv(Qt),a)))
-        x = np.linalg.solve(Qt, (gamma/2)*a+np.dot(Qt,qt))
-        r = np.dot(x-qt,np.dot(Qt,x-qt))
-        rList.append(r)
-        xList.append(x)
-        r = scoreState(Et, a)
-        rList.append(r)
-        xList.append(a)
-    
-    i = np.argmax(rList)
-    
-    return max(rList),xList[i]
-
 def minBoundaryToConstraint(SigInv,x,t):
     rList = []
     xList = []
@@ -343,45 +292,6 @@ def minBoundaryToConstraint(SigInv,x,t):
     i = np.argmin(rList)
     
     return rList[i],xList[i]
-
-def minBoundaryToConstraintVec(SigInv,SigInvBlock,x,t):
-    rList = []
-    xList = []
-    n = len(x)
-    Cx = constraints(t)
-    indSafe = np.ones(n)*True
-    
-    for Hdef in Cx:
-        a = Hdef[0]
-        b = Hdef[1]
-        if b < 0:
-            indSafe = np.logical_and(indSafe,a@x.T >= b)
-        else:
-            indSafe = np.logical_and(indSafe,a@x.T <= b)
-    
-        ax = a@x.T
-        aSa = np.dot(a,np.dot(np.linalg.inv(SigInv),a))
-        gammas = 2*(b-ax)/(aSa)
-        
-        bs = np.reshape((gammas[:,None]*a)/2 + (SigInv@x.T).T,env_params['dim']*n)
-        
-        xsol = np.reshape(sp.sparse.linalg.spsolve(SigInvBlock, bs),(n,env_params['dim']))
-        v = xsol - x
-        rc = np.einsum('ij,jk,ik->i',v,SigInv,v)
-        
-        rList.append(rc)
-        xList.append(xsol)
-    
-    rList = np.array(rList)
-    xList = np.array(xList)
-    inds = np.argmin(rList,axis = 0)
-    
-    
-    rs = np.array([rList[inds[i],i] for i in range(len(inds))])
-    xret = [xList[inds[i],i] for i in range(len(inds))]
-    rs[np.logical_not(indSafe)] = 0
-    
-    return rs,xret
 
 
 def maxBoundaryToConstraintLyapunov(t):
