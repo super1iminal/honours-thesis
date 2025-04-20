@@ -1,0 +1,247 @@
+Log started at: 2025-04-20_03h03m52s
+Using the following values for n, t, kp, kd and nom: 1000000, 15, -0.250000, -1.500000, (0.000000, 0.000000)
+Logging is at level 1
+Running region finding algorithm for time step 5
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 35.034637
+Ellipse: a = 4.994397, b = 2.232877, theta = 6.065253 radians
+Running region finding algorithm for region 1
+Accepted in iteration 0: 201410
+Total accepted points so far: 201410
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 69.665657
+Ellipse: a = 7.029360, b = 3.154664, theta = 6.020811 radians
+Running region finding algorithm for region 2
+Accepted in iteration 0: 20042
+Total accepted points so far: 20042
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 104.631958
+Ellipse: a = 8.613359, b = 3.866437, theta = 6.014853 radians
+Running region finding algorithm for region 3
+Accepted in iteration 0: 2189
+Total accepted points so far: 2189
+Accepted in iteration 50: 2071
+Total accepted points so far: 103149
+Accepted in iteration 100: 2072
+Total accepted points so far: 204632
+Accepted in iteration 150: 2065
+Total accepted points so far: 306371
+Accepted in iteration 200: 1925
+Total accepted points so far: 407526
+Accepted in iteration 250: 2031
+Total accepted points so far: 508781
+Accepted in iteration 300: 2052
+Total accepted points so far: 610472
+Accepted in iteration 350: 1957
+Total accepted points so far: 711676
+Accepted in iteration 400: 1981
+Total accepted points so far: 813552
+Accepted in iteration 450: 2060
+Total accepted points so far: 915740
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 139.615082
+Ellipse: a = 9.958422, b = 4.461903, theta = 6.012137 radians
+Running region finding algorithm for region 4
+Accepted in iteration 0: 216
+Total accepted points so far: 216
+Accepted in iteration 50: 204
+Total accepted points so far: 10619
+Accepted in iteration 100: 204
+Total accepted points so far: 20933
+Accepted in iteration 150: 175
+Total accepted points so far: 31235
+Accepted in iteration 200: 188
+Total accepted points so far: 41423
+Accepted in iteration 250: 197
+Total accepted points so far: 51672
+Accepted in iteration 300: 195
+Total accepted points so far: 61613
+Accepted in iteration 350: 167
+Total accepted points so far: 71685
+Accepted in iteration 400: 203
+Total accepted points so far: 82048
+Accepted in iteration 450: 214
+Total accepted points so far: 92258
+Accepted in iteration 500: 224
+Total accepted points so far: 102534
+Accepted in iteration 550: 207
+Total accepted points so far: 112775
+Accepted in iteration 600: 180
+Total accepted points so far: 122935
+Accepted in iteration 650: 209
+Total accepted points so far: 132969
+Accepted in iteration 700: 202
+Total accepted points so far: 143207
+Accepted in iteration 750: 210
+Total accepted points so far: 153360
+Accepted in iteration 800: 185
+Total accepted points so far: 163552
+Accepted in iteration 850: 199
+Total accepted points so far: 173596
+Accepted in iteration 900: 209
+Total accepted points so far: 183617
+Accepted in iteration 950: 170
+Total accepted points so far: 193837
+Accepted in iteration 1000: 253
+Total accepted points so far: 204145
+Accepted in iteration 1050: 192
+Total accepted points so far: 214238
+Accepted in iteration 1100: 189
+Total accepted points so far: 224396
+Accepted in iteration 1150: 222
+Total accepted points so far: 234475
+Accepted in iteration 1200: 229
+Total accepted points so far: 244561
+Accepted in iteration 1250: 229
+Total accepted points so far: 255059
+Accepted in iteration 1300: 202
+Total accepted points so far: 265171
+Accepted in iteration 1350: 219
+Total accepted points so far: 275299
+Accepted in iteration 1400: 202
+Total accepted points so far: 285497
+Accepted in iteration 1450: 231
+Total accepted points so far: 295479
+Accepted in iteration 1500: 194
+Total accepted points so far: 305587
+Accepted in iteration 1550: 196
+Total accepted points so far: 315692
+Accepted in iteration 1600: 168
+Total accepted points so far: 325811
+Accepted in iteration 1650: 237
+Total accepted points so far: 335736
+Accepted in iteration 1700: 224
+Total accepted points so far: 345758
+Accepted in iteration 1750: 194
+Total accepted points so far: 355691
+Accepted in iteration 1800: 188
+Total accepted points so far: 365875
+Accepted in iteration 1850: 211
+Total accepted points so far: 375975
+Accepted in iteration 1900: 206
+Total accepted points so far: 386101
+Accepted in iteration 1950: 204
+Total accepted points so far: 396231
+Accepted in iteration 2000: 230
+Total accepted points so far: 406358
+Accepted in iteration 2050: 182
+Total accepted points so far: 416376
+Accepted in iteration 2100: 210
+Total accepted points so far: 426458
+Accepted in iteration 2150: 236
+Total accepted points so far: 436724
+Accepted in iteration 2200: 175
+Total accepted points so far: 446843
+Accepted in iteration 2250: 214
+Total accepted points so far: 456999
+Accepted in iteration 2300: 173
+Total accepted points so far: 467127
+Accepted in iteration 2350: 164
+Total accepted points so far: 477286
+Accepted in iteration 2400: 210
+Total accepted points so far: 487504
+Accepted in iteration 2450: 186
+Total accepted points so far: 497644
+Accepted in iteration 2500: 218
+Total accepted points so far: 507996
+Accepted in iteration 2550: 194
+Total accepted points so far: 518124
+Accepted in iteration 2600: 198
+Total accepted points so far: 528217
+Accepted in iteration 2650: 214
+Total accepted points so far: 538301
+Accepted in iteration 2700: 220
+Total accepted points so far: 548631
+Accepted in iteration 2750: 224
+Total accepted points so far: 558766
+Accepted in iteration 2800: 192
+Total accepted points so far: 568922
+Accepted in iteration 2850: 203
+Total accepted points so far: 579139
+Accepted in iteration 2900: 197
+Total accepted points so far: 589317
+Accepted in iteration 2950: 185
+Total accepted points so far: 599516
+Accepted in iteration 3000: 218
+Total accepted points so far: 609760
+Accepted in iteration 3050: 202
+Total accepted points so far: 619870
+Accepted in iteration 3100: 221
+Total accepted points so far: 630198
+Accepted in iteration 3150: 184
+Total accepted points so far: 640416
+Accepted in iteration 3200: 189
+Total accepted points so far: 650355
+Accepted in iteration 3250: 204
+Total accepted points so far: 660468
+Accepted in iteration 3300: 236
+Total accepted points so far: 670638
+Accepted in iteration 3350: 195
+Total accepted points so far: 680741
+Accepted in iteration 3400: 168
+Total accepted points so far: 690840
+Accepted in iteration 3450: 208
+Total accepted points so far: 700908
+Accepted in iteration 3500: 192
+Total accepted points so far: 710978
+Accepted in iteration 3550: 198
+Total accepted points so far: 721176
+Accepted in iteration 3600: 197
+Total accepted points so far: 731365
+Accepted in iteration 3650: 223
+Total accepted points so far: 741662
+Accepted in iteration 3700: 224
+Total accepted points so far: 751792
+Accepted in iteration 3750: 227
+Total accepted points so far: 761732
+Accepted in iteration 3800: 222
+Total accepted points so far: 771909
+Accepted in iteration 3850: 168
+Total accepted points so far: 782237
+Accepted in iteration 3900: 174
+Total accepted points so far: 792254
+Accepted in iteration 3950: 202
+Total accepted points so far: 802360
+Accepted in iteration 4000: 228
+Total accepted points so far: 812496
+Accepted in iteration 4050: 222
+Total accepted points so far: 822576
+Accepted in iteration 4100: 213
+Total accepted points so far: 832859
+Accepted in iteration 4150: 217
+Total accepted points so far: 843060
+Accepted in iteration 4200: 169
+Total accepted points so far: 853071
+Accepted in iteration 4250: 197
+Total accepted points so far: 863078
+Accepted in iteration 4300: 199
+Total accepted points so far: 873126
+Accepted in iteration 4350: 207
+Total accepted points so far: 883213
+Accepted in iteration 4400: 184
+Total accepted points so far: 893461
+Accepted in iteration 4450: 180
+Total accepted points so far: 903647
+Accepted in iteration 4500: 173
+Total accepted points so far: 913747
+Accepted in iteration 4550: 194
+Total accepted points so far: 923677
+Accepted in iteration 4600: 212
+Total accepted points so far: 933639
+Accepted in iteration 4650: 206
+Total accepted points so far: 943881
+Accepted in iteration 4700: 202
+Total accepted points so far: 953941
+Accepted in iteration 4750: 207
+Total accepted points so far: 964023
+Accepted in iteration 4800: 211
+Total accepted points so far: 974417
+Accepted in iteration 4850: 202
+Total accepted points so far: 984721
+Accepted in iteration 4900: 206
+Total accepted points so far: 994970
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 174.618027
+Ellipse: a = 11.141163, b = 4.988892, theta = 6.011371 radians
+Time spent in find_regions: 117.971951 seconds

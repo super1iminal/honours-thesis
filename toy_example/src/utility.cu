@@ -128,7 +128,7 @@ __global__ void within_ellipses_d(float2 *x, Ellipse* ellipses, int* num_within_
 }
 
 
-// Device function to perform one simulation step
+// // Device function to perform one simulation step
 __device__ float2 step_toy(float2 x, float2 disturbance, float kp, float kd) {
     // Calculate velocity correction
     float correction = kp * x.x + kd * x.y;
@@ -271,6 +271,7 @@ void generate_points(Samples* samples, Ellipse* h_ellipse, int k, float kp, floa
     cudaMemset(d_total_accepted_global, 0, sizeof(unsigned int));
 
     // Loop until we have at least n accepted points
+    int counter = 0;
     while (total_accepted_host < n) {
         auto now = std::chrono::high_resolution_clock::now();
         unsigned long long seed = std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
@@ -288,9 +289,12 @@ void generate_points(Samples* samples, Ellipse* h_ellipse, int k, float kp, floa
         unsigned int accepted_in_iteration = total_accepted_host - prev_total_accepted_host;
         prev_total_accepted_host = total_accepted_host;
 
-        log(logger, LOG_BASIC, "Accepted in this iteration: %u\n", accepted_in_iteration);
-        log(logger, LOG_BASIC, "Total accepted points so far: %u\n", total_accepted_host);
-
+        if (counter % 50 == 0) {
+            log(logger, LOG_BASIC, "Accepted in iteration %d: %u\n", counter, accepted_in_iteration);
+            log(logger, LOG_BASIC, "Total accepted points so far: %u\n", total_accepted_host);
+        }
+        
+        counter++;
         // Optional: Adjust MAX_THREADS or other parameters if needed
     }
 

@@ -14,7 +14,6 @@
 typedef struct Gradient Gradient;
 typedef struct Logger Logger;
 
-// Updated Iteration_Info to use Ellipse* instead of float*
 typedef struct Iteration_Info {
     Ellipse *h_ellipse;
     Samples *samples;
