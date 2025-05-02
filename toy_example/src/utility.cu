@@ -289,13 +289,12 @@ void generate_points(Samples* samples, Ellipse* h_ellipse, int k, float kp, floa
         unsigned int accepted_in_iteration = total_accepted_host - prev_total_accepted_host;
         prev_total_accepted_host = total_accepted_host;
 
-        if (counter % 50 == 0) {
-            log(logger, LOG_BASIC, "Accepted in iteration %d: %u\n", counter, accepted_in_iteration);
-            log(logger, LOG_BASIC, "Total accepted points so far: %u\n", total_accepted_host);
+        if (counter % 250 == 0) {
+            log(logger, LOG_ADVANCED, "Accepted in iteration %d: %u\n", counter, accepted_in_iteration);
+            log(logger, LOG_ADVANCED, "Total accepted points so far: %u\n", total_accepted_host);
         }
         
         counter++;
-        // Optional: Adjust MAX_THREADS or other parameters if needed
     }
 
     // Ensure we don't copy more data than we have accepted

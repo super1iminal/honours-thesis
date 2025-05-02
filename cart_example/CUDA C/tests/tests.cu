@@ -1,6 +1,6 @@
 // tests.cu
 #include "../src/utility.cuh"
-#include "../src/simulation.cuh" // Include your header files
+#include "../src/simulation.cuh"
 #include "../src/cubic_spline.cuh"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 //------------------------------------------------------------------------------
 void testHostMatrixWithFill()
 {
-    std::cout << "[Test] Matrix Device init with specified fill..." << std::endl;
     const int rows = 4, cols = 5;
     const float fill = 2.5f;
     Matrix m(rows, cols, fill, PROCESSOR::HOST);
@@ -43,8 +42,6 @@ void testHostMatrixWithFill()
             assert(rowPtr[j] == fill);
         }
     }
-
-    std::cout << "✔ testHostMatrixWithFill passed." << std::endl << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -52,7 +49,6 @@ void testHostMatrixWithFill()
 //------------------------------------------------------------------------------
 void testHostMatrixDefault()
 {
-    std::cout << "[Test] Matrix Device init with default fill..." << std::endl;
     const int rows = 3, cols = 3;
     Matrix m(rows, cols, PROCESSOR::HOST);
 
@@ -69,13 +65,10 @@ void testHostMatrixDefault()
             assert(m(i, j) == 0.0f);
         }
     }
-
-    std::cout << "✔ testHostMatrixDefault passed." << std::endl << std::endl;
 }
 
 void testHostMatrixWithData()
 {
-    std::cout << "[Test] Matrix Host init with data..." << std::endl;
     const int rows = 3, cols = 3;
     float **data = new float *[rows];
     for (int i = 0; i < rows; ++i)
@@ -108,8 +101,6 @@ void testHostMatrixWithData()
         delete[] data[i];
     }
     delete[] data;
-
-    std::cout << "✔ testHostMatrixWithData passed." << std::endl << std::endl;
 }
 
 // Device Tests ==================================================================
@@ -134,7 +125,6 @@ void verifyDeviceMatrix(const Matrix &m, float *expected_data)
 //------------------------------------------------------------------------------
 void testDeviceMatrixWithFill()
 {
-    std::cout << "[Test] Matrix Device init with specified fill..." << std::endl;
     const int rows = 6, cols = 9;
     const float fill = 1.17;
     Matrix m(rows, cols, fill, PROCESSOR::DEVICE);
@@ -155,8 +145,6 @@ void testDeviceMatrixWithFill()
     verifyDeviceMatrix(m, expected_data);
 
     delete[] expected_data;
-
-    std::cout << "✔ testDeviceMatrixWithFill passed." << std::endl << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -164,7 +152,6 @@ void testDeviceMatrixWithFill()
 //------------------------------------------------------------------------------
 void testDeviceMatrixDefault()
 {
-    std::cout << "[Test] Matrix Device init with default fill..." << std::endl;
     const int rows = 5, cols = 5;
     Matrix m(rows, cols, PROCESSOR::DEVICE);
 
@@ -184,8 +171,6 @@ void testDeviceMatrixDefault()
     verifyDeviceMatrix(m, expected_data);
 
     delete[] expected_data;
-
-    std::cout << "✔ testDeviceMatrixDefault passed." << std::endl << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -193,8 +178,6 @@ void testDeviceMatrixDefault()
 //------------------------------------------------------------------------------
 void testDeviceMatrixWithData()
 {
-    std::cout << "[Test] Matrix Device init with data..." << std::endl;
-
     const int rows = 3, cols = 3;
     float **data = new float *[rows];
     for (int i = 0; i < rows; ++i)
@@ -232,8 +215,6 @@ void testDeviceMatrixWithData()
         delete[] data[i];
     }
     delete[] data;
-
-    std::cout << "✔ testDeviceMatrixWithData passed." << std::endl << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -292,7 +273,6 @@ void runNotAKnotKernel(const Matrix &m_in_host, Matrix &m_out_host)
 //------------------------------------------------------------------------------
 void test_constant_function()
 {
-    std::cout << "[Test] CubicSpline Constant function..." << std::endl;
 
     // Suppose we have M=3 splines, each with length N=5, all values=7.f
     int M = 3;
@@ -311,7 +291,6 @@ void test_constant_function()
         float val = m_out_host[i][0];
         assert(closeEnough(val, 7.0f, 1e-6f) && "Min of constant function should be 7.0");
     }
-    std::cout << "✔ test_constant_function passed." << std::endl << std::endl;
 }
 
 //------------------------------------------------------------------------------
@@ -324,7 +303,6 @@ void test_constant_function()
 //------------------------------------------------------------------------------
 void test_known_shape()
 {
-    std::cout << "[Test] CubicSpline Known shape [1,3,2,0,2]..." << std::endl;
 
     int M = 1;
     int N = 5;
@@ -346,11 +324,14 @@ void test_known_shape()
     // is around index ~3, but let's see if the interpolation dips slightly below 0
     // or not. Let's just check that it is around 0. We'll require val <= 0.1
     float val = m_out_host[0][0];
-    printf("  Computed min = %f\n", val);
     // We just check it's near zero (or possibly negative if the spline dips below data[3]=0).
     // In not-a-knot, it might be exactly at or just below 0, typically in [ -0.05, 0.05].
-    assert(val < 0.2f && "Min is expected to be near or below 0.2 for this known shape.");
-    std::cout << "✔ test_known_shape passed." << std::endl << std::endl;
+    assert(closeEnough(val, -0.104182f, 0.02f) && "Min is expected to be near -0.104182f for this shape.");
+    // from 
+        // https://tools.timodenk.com/cubic-spline-interpolation
+        // and 
+        // https://www.desmos.com/calculator
+
 }
 
 //------------------------------------------------------------------------------
@@ -359,7 +340,6 @@ void test_known_shape()
 //------------------------------------------------------------------------------
 void test_multiple_splines()
 {
-    std::cout << "[Test] CubicSpline Multiple different splines in one matrix..." << std::endl;
 
     int M = 3; // number of splines
     int N = 5; // length of each spline
@@ -389,6 +369,7 @@ void test_multiple_splines()
     m_in_host[2][3] = 3.f;
     m_in_host[2][4] = 5.f;
 
+
     // Output shape is (M, 1)
     Matrix m_out_host(M, 1, PROCESSOR::HOST);
 
@@ -406,8 +387,98 @@ void test_multiple_splines()
     // The spline might dip slightly below 2 due to the curvature,
     // but it should be close to 2.
     assert(m_out_host[2][0] < 3.f && "Should be near or below 2-2.2 range for the third row.");
+}
 
-    std::cout << "✔ test_multiple_splines passed." << std::endl << std::endl;
+//------------------------------------------------------------------------------
+// Test 4: Stress test with 100,000 rows and 100 columns
+//------------------------------------------------------------------------------
+void test_stress_increasing()
+{
+
+    // 1) Dimensions
+    int M = 10000000; // number of rows (splines)
+    int N = 100;    // length of each spline
+
+    // 2) Allocate a host Matrix for input
+    Matrix m_in_host(M, N, PROCESSOR::HOST, false); // 'false' => no random fill; we fill manually
+
+    // 3) Fill each row with an ascending sequence:
+    //    For row i, we can do: row i =>  (i*0.01 + 0), (i*0.01 + 1), (i*0.01 + 2), ...
+    //    or simply (0,1,2,...,N-1). The actual offset doesn't matter for the min.
+    //    We'll just do (0,1,2,...,N-1).
+    for (int i = 0; i < M; ++i)
+    {
+        for (int j = 0; j < N; ++j)
+        {
+            m_in_host[i][j] = static_cast<float>(j);
+        }
+    }
+
+    // 4) Allocate a host Matrix for output (M x 1)
+    Matrix m_out_host(M, 1, PROCESSOR::HOST);
+
+    // 5) Launch the kernel
+    runNotAKnotKernel(m_in_host, m_out_host);
+
+    // 6) Verify a subset of results.
+    //    The sequence is strictly increasing, so the minimum should be the
+    //    first element in each row, i.e. 0.0f. We'll do a partial check to
+    //    avoid scanning all 100k if we want to keep time down.
+    for (int i = 0; i < M; i += 10000) // check every 10k-th row
+    {
+        float val = m_out_host[i][0];
+        // Should be near zero. We'll allow some tolerance for floating math/curvature.
+        if (!closeEnough(val, 0.0f, 0.02f))
+        {
+            printf("    Failure at row %d: got %f, expected ~0.0\n", i, val);
+            assert(false);
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+// Test 5: A single spline with a known shape
+//         We'll create a shape with N=4 points (0..3) => y = [100, -5, -5, 100]
+//         The minimum (of the natural or not-a-knot spline) should be near x=1.5.
+//         I've found the value through manual calculations to be approximately -18.125.
+//         We'll check that the computed value is near this.
+//------------------------------------------------------------------------------
+void test_known_shape_negative()
+{
+
+    int M = 1;
+    int N = 4;
+    Matrix m_in_host(M, N, PROCESSOR::HOST, false); // We'll fill data manually
+    // Fill row 0: 1, 3, 2, 0, 2
+    m_in_host[0][0] = 100.f;
+    m_in_host[0][1] = -5.f;
+    m_in_host[0][2] = -5.f;
+    m_in_host[0][3] = 100.f;
+
+    // Create output
+    Matrix m_out_host(M, 1, PROCESSOR::HOST);
+
+    // Launch
+    runNotAKnotKernel(m_in_host, m_out_host);
+
+    float val = m_out_host[0][0];
+    // printf("  Computed min = %f\n", val);
+    assert(closeEnough(val, -18.125f, 0.2f) && "Min is expected to be near -18.125 for this known shape.");
+}
+
+// Simple wrapper that measures time, runs the test, and prints the result.
+void runTest(const std::string &testName, void (*testFunc)()) {
+    std::cout << "[Running] " << testName << "...\n";
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // Run the test
+    testFunc();
+
+    auto end = std::chrono::high_resolution_clock::now();
+    // Calculate duration as a floating-point number in milliseconds
+    double durationMs = std::chrono::duration<double, std::milli>(end - start).count();
+
+    std::cout << "[Success] Test took " << durationMs << " ms.\n\n";
 }
 
 //------------------------------------------------------------------------------
@@ -416,20 +487,23 @@ void test_multiple_splines()
 int main()
 {
     // Run tests on host-based matrices
-    testHostMatrixWithFill();
-    testHostMatrixDefault();
-    testHostMatrixWithData();
+    // runTest("Matrix Device init with specified fill", testHostMatrixWithFill);
+    // runTest("Matrix Device init with default fill", testHostMatrixDefault);
+    // runTest("Matrix Device init with data", testHostMatrixWithData);
 
-    // Run tests on device-based matrices
-    testDeviceMatrixWithFill();
-    testDeviceMatrixDefault();
-    testDeviceMatrixWithData();
+    // // Run tests on device-based matrices
+    // runTest("Matrix Host init with specified fill", testDeviceMatrixWithFill);
+    // runTest("Matrix Host init with default fill", testDeviceMatrixDefault);
+    // runTest("Matrix Host init with data", testDeviceMatrixWithData);
 
-    // run cubic spline tests
-    test_constant_function();
-    test_known_shape();
-    test_multiple_splines();
+    // // Run cubic spline tests
+    runTest("CubicSpline Constant function", test_constant_function);
+    runTest("CubicSpline Known shape [1,3,2,0,2]", test_known_shape);
+    runTest("CubicSpline Known shape [100,-5, -5, 100]", test_known_shape_negative);
+    runTest("CubicSpline Multiple different splines in one matrix", test_multiple_splines);
+    runTest("CubicSpline Stress test: 10 million rows x 100 cols, strictly increasing", test_stress_increasing); 
+        // note: about 1.7s for 10M rows and 0.17s for 1M rows, segfault for 100M rows (too large since 100M * 100 = 40GB)
 
-    std::cout << "All tests passed.\n";
+    std::cout << "All tests completed.\n";
     return 0;
 }

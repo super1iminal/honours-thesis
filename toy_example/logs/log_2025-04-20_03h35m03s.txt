@@ -1,0 +1,109 @@
+Log started at: 2025-04-20_03h35m03s
+Using the following values for n, t, kp, kd and nom: 1000000, 5, -0.250000, -1.500000, (0.000000, 0.000000)
+Logging is at level 1
+Running region finding algorithm for time step 0
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 14.471267
+Ellipse: a = 2.147683, b = 2.144792, theta = 0.000000 radians
+Running region finding algorithm for region 1
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 28.963598
+Ellipse: a = 3.030471, b = 3.042153, theta = 6.283171 radians
+Running region finding algorithm for region 2
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 43.463394
+Ellipse: a = 3.714651, b = 3.724289, theta = 0.000001 radians
+Running region finding algorithm for region 3
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 57.939651
+Ellipse: a = 4.281630, b = 4.307311, theta = 0.000008 radians
+Running region finding algorithm for region 4
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 72.407249
+Ellipse: a = 4.800725, b = 4.800725, theta = 0.000000 radians
+Running region finding algorithm for time step 1
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 27.667475
+Ellipse: a = 3.799179, b = 2.318088, theta = 6.144434 radians
+Running region finding algorithm for region 1
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 53.267460
+Ellipse: a = 5.507900, b = 3.078407, theta = 5.955338 radians
+Running region finding algorithm for region 2
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 79.748230
+Ellipse: a = 6.751792, b = 3.759685, theta = 5.920824 radians
+Running region finding algorithm for region 3
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 106.325439
+Ellipse: a = 7.786675, b = 4.346057, theta = 5.918430 radians
+Running region finding algorithm for region 4
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 132.911697
+Ellipse: a = 8.704537, b = 4.860014, theta = 5.919876 radians
+Running region finding algorithm for time step 2
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 30.733881
+Ellipse: a = 4.271825, b = 2.290098, theta = 6.111345 radians
+Running region finding algorithm for region 1
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 60.273205
+Ellipse: a = 6.118952, b = 3.135275, theta = 5.990521 radians
+Running region finding algorithm for region 2
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 90.510742
+Ellipse: a = 7.475645, b = 3.853907, theta = 5.990107 radians
+Running region finding algorithm for region 3
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 120.575012
+Ellipse: a = 8.664367, b = 4.429072, theta = 5.984082 radians
+Running region finding algorithm for region 4
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 150.852829
+Ellipse: a = 9.671992, b = 4.964162, theta = 5.984975 radians
+Running region finding algorithm for time step 3
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 32.953274
+Ellipse: a = 4.632321, b = 2.264384, theta = 6.083549 radians
+Running region finding algorithm for region 1
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 65.217171
+Ellipse: a = 6.607359, b = 3.141511, theta = 6.002937 radians
+Running region finding algorithm for region 2
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 97.792305
+Ellipse: a = 8.083024, b = 3.850225, theta = 6.000340 radians
+Running region finding algorithm for region 3
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 130.431717
+Ellipse: a = 9.333908, b = 4.448051, theta = 5.995996 radians
+Running region finding algorithm for region 4
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 163.036163
+Ellipse: a = 10.445582, b = 4.967697, theta = 5.994643 radians
+Running region finding algorithm for time step 4
+Running region finding algorithm for region 0
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 34.240166
+Ellipse: a = 4.881495, b = 2.232714, theta = 6.072316 radians
+Running region finding algorithm for region 1
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 67.929840
+Ellipse: a = 6.888326, b = 3.139038, theta = 6.019279 radians
+Running region finding algorithm for region 2
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 102.032768
+Ellipse: a = 8.415277, b = 3.859195, theta = 6.008618 radians
+Running region finding algorithm for region 3
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 136.061615
+Ellipse: a = 9.730905, b = 4.449669, theta = 6.008854 radians
+Running region finding algorithm for region 4
+Starting gradient descent with hyperparameters: perturbation = 0.009479, initial learning rate = 0.042684, threshold = 0.000200, max iterations = 100
+Final area of ellipse after gradient descent: 170.073563
+Ellipse: a = 10.867347, b = 4.981348, theta = 6.005056 radians
+Time spent in find_regions: 599.955387 seconds

@@ -24,7 +24,7 @@ The distance to a point determines the radius of the circle
 int main(int argc, char* argv[]) {
     //////////////// INITIAL SETUP ////////////////
     int n = 1000000; // number of samples
-    int t = 15;      // time horizon
+    int t = 5;      // time horizon
     float kp = -0.25f; // proportional gain
     float kd = -1.5f;  // derivative gain
     float2 nom = {0.0f, 0.0f}; // nominal state
@@ -35,14 +35,14 @@ int main(int argc, char* argv[]) {
     int i = 1;
     while (i < argc) {
         if (strcmp(argv[i], "-h") == 0) {
-            printf("Usage: ./run [-n 5000] [-t 10] [-kp -0.25] [-kd -1.5] [-nom 0.0 0.0] [-log 2]\n");
+            printf("Usage: ./run [-n 1000000] [-t 5] [-kp -0.25] [-kd -1.5] [-nom 0.0 0.0] [-log 2]\n");
             printf("n: number of samples\n");
             printf("t: time horizon\n");
             printf("kp: proportional gain\n");
             printf("kd: derivative gain\n");
             printf("nom: nominal state\n");
             printf("log: logging level (0, 1, 2 or 3)\n");
-            printf("default values: n = 5000, t = 15, kp = -0.25, kd = -1.5, nom = (0.0, 0.0), log = 1\n");
+            printf("default values: n = 1000000, t = 5, kp = -0.25, kd = -1.5, nom = (0.0, 0.0), log = 1\n");
             return 0;
         } else if (strcmp(argv[i], "-n") == 0) {
             n = atoi(argv[i+1]);
@@ -64,7 +64,9 @@ int main(int argc, char* argv[]) {
             log_level = atoi(argv[i+1]);
             i += 2;
         } else {
-            i++;
+            printf("Incorrect use of command line arguments.\n");
+            printf("Use -h for help.\n");
+            return 0;
         }
     }
 
