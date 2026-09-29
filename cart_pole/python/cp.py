@@ -5,6 +5,9 @@ import pickle
 import matplotlib.pyplot as plt
 from enum import Enum
 from collections import defaultdict
+import time
+
+# ==================== SETUP/CONSTS ============================
 
 class MODE(Enum):
     FAIL = 0    # The state violates a safety constraint.  We won't compute any successors 
@@ -76,6 +79,10 @@ def violates_constraints(state: torch.tensor):
     return False
 
 
+# ==================== END SETUP/CONSTS ============================
+
+
+# ==================== SIMULATOR ============================
 def cp_step(state: torch.tensor):  # s is a cart-pole state, should have requires_grad=True for torch to track all operations
     x, x_dot, theta, theta_dot = state
     cp_consts = cart_pole_consts()
@@ -105,6 +112,7 @@ def cp_step(state: torch.tensor):  # s is a cart-pole state, should have require
     
     return next_state, f
 
+# returns the change in state, not the new state (used to find the Jacobian)
 def ode_step(state: torch.tensor):  # s is a cart-pole state, should have requires_grad=True for torch to track all operations
     x, x_dot, theta, theta_dot = state
     cp_consts = cart_pole_consts()
@@ -132,6 +140,9 @@ def ode_step(state: torch.tensor):  # s is a cart-pole state, should have requir
     
     return ddt
 
+# ==================== END SIMULATOR ============================
+
+# ==================== FUNCTINOAL ============================
 def get_Jacobian(state: torch.tensor):
     return AF.jacobian(ode_step, state)
 
@@ -234,12 +245,11 @@ def generate_cp_states(n_x=5, n_xdot=5, n_theta=5, n_thetadot=5): # 4D grid of s
     grid_torch = torch.from_numpy(grid_np).float()
     return grid_torch # each row is a state
 
-def get_J(n_x=5, n_xdot=5, n_theta=5, n_thetadot=5):
+def generate_J_and_states(n_x=5, n_xdot=5, n_theta=5, n_thetadot=5):
     states = generate_cp_states(n_x, n_xdot, n_theta, n_thetadot)
     Jacobians = []
     for i in range(states.shape[0]):
         Jacobians.append(get_Jacobian(states[i]))
-    
     return states, Jacobians
 
 def classify_state(state, J):
@@ -267,19 +277,10 @@ def classify_state(state, J):
     if (num_ccs == 2):
         return MODE.J2
 
-# storage unit is just a funny name
-def save_storage_unit(stoage_unit: dict, filename: str = "storage_unit.pkl"):
-    with open(filename, "wb") as f:
-        pickle.dump(stoage_unit, f, protocol=pickle.HIGHEST_PROTOCOL)
-    
-def load_storage_unit(filename: str = "storage_unit.pkl"):
-    with open(filename, "rb") as f:
-        storage_unit = pickle.load(f)
-    return storage_unit
-    
+
 def make_storage_unit(n_x = 5, n_xdot = 5, n_theta = 5, n_thetadot = 5):
     
-    states, Jacobians = get_J(n_x, n_xdot, n_theta, n_thetadot)
+    states, Jacobians = generate_J_and_states(n_x, n_xdot, n_theta, n_thetadot)
     states_class = [classify_state(state, J) for (state, J) in zip(states, Jacobians)]
     
     # sort all based on mode (class)
@@ -333,8 +334,30 @@ def make_storage_unit(n_x = 5, n_xdot = 5, n_theta = 5, n_thetadot = 5):
     }
     return storage_unit
 
+# ==================== END FUNCTIONAL ============================
+
+
+
+# ==================== PERSISTENCE ============================
+
+# storage unit is just a funny name
+def save_storage_unit(stoage_unit: dict, filename: str = "storage_unit.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(stoage_unit, f, protocol=pickle.HIGHEST_PROTOCOL)
+    
+def load_storage_unit(filename: str = "storage_unit.pkl"):
+    with open(filename, "rb") as f:
+        storage_unit = pickle.load(f)
+    return storage_unit
+
+# ==================== END PERSISTENCE ============================
+
+
+# ==================== META - MAIN ============================
 def data_processing(load:bool = False, save:bool = False, filename = "storage_unit.pkl"):    
     if load and save:
+        exit(-1)
+    if not (load or save):
         exit(-1)
     
     if load:
@@ -361,6 +384,10 @@ def data_processing(load:bool = False, save:bool = False, filename = "storage_un
     plot_eigenvalues(sorted_eig_data, title="J1 Eigenvalues")
     plt.show()
     
+# ==================== END META - MAIN ============================
+
+
+# ==================== PLOTTING ============================
     
 def plot_eigenvalues(eig_data, title="Eigenvalues on Complex Plane", save_path=None):
     fig, ax = plt.subplots(figsize=(12, 9))
@@ -550,28 +577,26 @@ def plot_transition_stats_table(possible_transitions, title="Transition Statisti
     plt.tight_layout()
     return fig
 
-# def cp_example(n=20, s0 = [-0.1, 0.01, 0.2, 0.03]):
-#    s = s0
-#    for i in range(n):
-#        s, f = cp_step(s)
-#        print("{0:3d}: f={1:6.4f}, s = [{2:6.4f}, {3:6.4f}, {4:6.4f}, {5:6.4f}]".
-#              format(i, f, s[0], s[1], s[2], s[3]))
-#    return s
 
-# 1. 
-# saturated -> unsaturated/fail in bounded number of steps? probably, histogram
-# once unsaturated, do you ever get back into saturated? proably not, we can check
+# ==================== END PLOTTING ============================
 
-# eigs w positive real parts -> all negative/fail? in bounded number of steps?
-# vice versa but also get to saturated?
 
-# 2.
-# visualize 2 conjugate (negative) -> origin (1 conjugate, 2 reals), by eig similarity
-# if cant differentiate. split time step in 2
-# when meeting at real axis, cant do this, because equidistant
-# arrows between
 
-# 3.
+# ==================== RUNNING ============================
+
+start_time = time.time()
+
+data_processing(load=True)
+
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"Execution time: {execution_time:.4f} seconds")
+
+# ==================== END RUNNING ============================
+
+
+# ==================== FUTURE WORK ============================
+# flood fill
 # find connected set of 2 real, 1 conjugate, all neg, unsaturated (R0)
 # fine set of 100x100x100x100
 # each block can hold a 16x16x16x16 (or whatever fits in memory) block
@@ -582,45 +607,11 @@ def plot_transition_stats_table(possible_transitions, title="Transition Statisti
 
 
 
-
+# finding saddle point
 # newton step on long pos solves
 # multiply deriv by inverse of jacobian
 # if deriv is 0, then no lyapunov function
 # could also sample in a bounding box of all 12 pos
 # then resample on longest ones
 # first check if it remains in POS
-
-
-# intro that's a description of area
-# paragraph or 2 to tell the reader what we're doin
-# challenge: work in the real world
-# most of introudction from thesis
-# if we could establish this, it would give a much
-
-# one claim: some of these problems benefit from large-scale simulation
-# two codebases
-
-
-# providing insight into characterizing state space
-
-# three contributions that i would give that would establish the main claim
-
-# possibly related work
-
-# conclusions and future work, dumping ground
-
-
-# can we get to the subset of J1 that converge to origin
-# subset: eig near -7, -2, and complex conjugate
-# looking over all J1_C ^, find mean and std from -7, -2, then do the same for complex conjugate pair
-  # project one eigenvector into another jac's basis, see how far it is from unit
-# make sure its close
-
-
-import time
-
-start_time = time.time()
-data_processing(load=True)
-end_time = time.time()
-execution_time = end_time - start_time
-print(f"Execution time: {execution_time:.4f} seconds")
+# ==================== END FUTURE WORK ============================

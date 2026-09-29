@@ -1,4 +1,14 @@
-/build
-/plot_info
-/logs
+# Build output
+build/
+*.o
+*.d
 run
+run_tests
+toy_controller/main
+cart_pole/CUDA C/main
+
+# Run logs
+logs/
+
+# Large generated data (1.6 GB, over GitHub's 100 MB file limit)
+cart_pole/python/storage_unit.pkl
