@@ -7,8 +7,9 @@ run_tests
 toy_controller/main
 cart_pole/CUDA C/main
 
-# Run logs
-logs/
+# Run logs (keep the folder so the logger can write into it)
+**/logs/*
+!**/logs/.gitkeep
 
 # Large generated data (1.6 GB, over GitHub's 100 MB file limit)
 cart_pole/python/storage_unit.pkl

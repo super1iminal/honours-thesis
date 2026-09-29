@@ -220,10 +220,8 @@ __global__ void generate_points_kernel(float2* global_output, Ellipse* ellipse, 
     positions[threadIdx.x] = flags[threadIdx.x] - accepted;
     __syncthreads();
 
+    // flags holds an inclusive scan, so its last entry is already the block's total
     int accepted_in_block = flags[blockDim.x - 1];
-    if (threadIdx.x == blockDim.x - 1 && accepted) {
-        accepted_in_block += 1;
-    }
 
     __shared__ unsigned int global_offset;
     if (threadIdx.x == 0) {

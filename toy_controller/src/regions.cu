@@ -33,7 +33,7 @@ void find_regions(Sim_Metadata *meta, Logger *logger, int num_regions) {
     // do for every time step
     while (meta->t_curr < meta->t ) {
         // needs to be in the loop to reset samples
-        Iteration_Info* info = iteration_init(1000000);
+        Iteration_Info* info = iteration_init(meta->n);
         if (info == NULL) {
             fprintf(stderr, "ERROR: Unable to create Iteration_Info.\n");
             exit(EXIT_FAILURE);
