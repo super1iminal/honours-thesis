@@ -4,7 +4,6 @@ build/
 *.d
 run
 run_tests
-toy_controller/main
 cart_pole/CUDA C/main
 
 # Run logs (keep the folder so the logger can write into it)

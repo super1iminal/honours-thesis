@@ -12,7 +12,6 @@ typedef struct Sim_Metadata {
     int t_curr; // Current time step, 1 is the first
     float kp;   // Proportional gain
     float kd;   // Derivative gain
-    float2 nom; // Nominal position
 } Sim_Metadata;
 
 // Samples Struct

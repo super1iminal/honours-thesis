@@ -19,7 +19,7 @@ OBJ_FILES := $(addprefix $(BUILD_DIR)/, $(notdir $(OBJS)))
 DEP_FILES := $(addprefix $(BUILD_DIR)/, $(notdir $(DEPS)))
 
 # Output program name
-PROGS     := main
+PROGS     := run
 
 .PHONY: all clean
 all: $(BUILD_DIR) $(PROGS)
@@ -29,12 +29,12 @@ $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
 # Link the program
-main: $(OBJ_FILES)
-	$(NVCC) $(CUFLAGS) $(OBJ_FILES) -o run -lcurand
+$(PROGS): $(OBJ_FILES)
+	$(NVCC) $(CUFLAGS) $(OBJ_FILES) -o $@ -lcurand
 
 # Clean up build directory
 clean:
-	rm -rf $(BUILD_DIR) run
+	rm -rf $(BUILD_DIR) $(PROGS)
 
 # Compilation rule for .o files, placing them in the build directory
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cu
