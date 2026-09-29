@@ -1,67 +1,52 @@
-p0 - the distribution of initial states
-N - the number of Monte Carlo simulations
-y -  a user defined confidence level
-T - the time horizon of interest
-M - the system model under test
+# Honours Thesis
 
-F_0:T = {F_0, F_1, ..., F_T} - the user provided failure regions over the time horizon T of interest
-X_0:T <- N Monte Carlo simulated trajectories with model M with initial states drawn from p0
-R_0:T = {R(0, L_1), R(1, L_2), ..., R(T, L_T)} - the set of regions defined by X_0:T+1 and F_0:T in equation 11*
-    recall that regions change between every time step
+GPU-accelerated Monte Carlo simulation for verifying that autonomous controllers fail rarely, written for my UBC Computer Science honours thesis. The code fits minimum volume enclosing ellipses to millions of simulated states to partition the state space for Quasi-Markov Chain failure bounds, and explores eigenvalue-based partitions for a learned cart-pole controller. The full thesis is in [docs/Honours_Thesis.pdf](docs/Honours_Thesis.pdf).
 
-t <- 0
+## Layout
 
+- `docs/` holds the thesis PDF.
+- `toy_controller/` is the CUDA C region finder for a PD controller with Gaussian noise.
+  - `src/` has the simulation, bisection search, gradient descent and region-finding code.
+  - `plotting_script/` plots sampled states with their fitted ellipses.
+  - `plot_info/` stores the states and ellipses written by a run.
+  - `plots/` contains the rendered figures used in the thesis.
+  - `logs/` collects time-stamped run logs, which git ignores.
+  - `images/` keeps equation screenshots from early notes.
+- `cart_pole/` covers the learned cart-pole controller.
+  - `CUDA C/` is a CUDA C++ prototype that simulates the cart-pole with the learned policy and Lyapunov network on the GPU, along with a cubic spline kernel and its tests.
+  - `python/` classifies states by the eigenvalues of their Jacobians and tracks transitions between modes, and includes the learned controller weights and a Conda environment.
 
-equations:
+## Running
 
-11: 
+Both CUDA programs need an NVIDIA GPU and `nvcc`, and their Makefiles target `sm_86`.
 
-![alt text](images/image.png)
-- how does Rmax relate to Ri? is it just the furthest region?
+### Toy controller
 
-12: 
+From `toy_controller/`
 
-![alt text](images/image-1.png)
+```bash
+make
+./run -t 5
+```
 
+`./run -h` lists the options for sample count, time horizon, controller gains and log level. On the UBC GPU cluster, `sbatch run_program.sh` submits the same run as a job.
 
+To plot a run, install pandas and matplotlib and then, from `toy_controller/plotting_script/`
 
-questions: 
-- how many regions in toy car?
-- how is the decision of 
+```bash
+python plot.py -t 5
+```
 
+### Cart-pole
 
-notes
-start with fixed starting position
-at each step, apply the linear operator to figure out the change in speed
-covariance matrix for the ellipse
+The CUDA prototype in `cart_pole/CUDA C/` builds with `make`, and `make test` builds the spline tests as `run_tests`.
 
-positive definite matrix is ellipse
-bisection run to find smallest area ellipse for the right fraction of points
+The Python analysis runs from `cart_pole/python/` in the included Conda environment.
 
-aggreagate points 
-vector with number of points in given ellipse out of n
-move vector back to host to find bisection
-can relaunch with same seeds, also can not care
+```bash
+conda env create -f environment.yml
+conda activate ubc_thesis
+python cp_eigdata.py
+```
 
-N(0, sigma) is multidimensional normal
-
-a few tens of ellipses might be a nice number
-
-could do linear apprixmatino when close (after a couple runs)
-
-this is all given eccentricity (relative ratio and orientation) of ellipse
-
-so, perturb these and restart to find another minimum area ellipse
-
-
-distance can be found with the normal equation
-
-starting interval: ellipse with furthest point and ellipse with closest point
-
-find gradient from derivative
-
-theory:
-when close to minimal point, ellipse has similar shape to disturbance Sigma
-
-when you're further away, the fixer is working hard to overpower disturbance, so ellipse shape is more interesting
-- 
+`cp_eigdata.py` and `cp_eigsummary.py` read the included `cp_jacobians.pkl`. `cp.py` loads `storage_unit.pkl`, which is too large for the repository, so on a fresh clone change the `data_processing(load=True)` call at the bottom of `cp.py` to `data_processing(save=True)` to generate it first.
